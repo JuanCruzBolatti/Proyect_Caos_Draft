@@ -1,9 +1,5 @@
-// script.js
-
-// Datos iniciales
 let juegos = [];
 
-// Elementos del DOM
 const formJuego = document.getElementById("form-juego");
 const juegoTitulo = document.getElementById("juego-titulo");
 
@@ -18,26 +14,24 @@ const btnMapaAleatorio = document.getElementById("btn-mapa-aleatorio");
 const resultadoAleatorio = document.getElementById("resultado-aleatorio");
 const btnReiniciarBaneos = document.getElementById("btn-reiniciar-baneos");
 
-// Función para actualizar los selects
 function actualizarSelects() {
   [selectJuegoMapa, selectJuegoRandom].forEach(select => {
-    // Guardar valor seleccionado
+
     const selectedValue = select.value;
-    // Limpiar opciones
+
     select.innerHTML = '<option value="">-- Selecciona un juego --</option>';
-    // Agregar juegos
+
     juegos.forEach(juego => {
       const option = document.createElement("option");
       option.value = juego.id;
       option.textContent = juego.titulo;
       select.appendChild(option);
     });
-    // Restaurar valor si existe
+
     if (selectedValue) select.value = selectedValue;
   });
 }
 
-// Función para mostrar mapas del juego seleccionado (para banear)
 function mostrarMapas() {
   listaMapas.innerHTML = "";
   const juegoId = selectJuegoRandom.value;
@@ -61,14 +55,10 @@ function mostrarMapas() {
   });
 }
 
-// Función para generar un id único
 function generarId() {
   return Date.now() + Math.floor(Math.random() * 1000);
 }
 
-// --- EVENTOS ---
-
-// Agregar juego
 formJuego.addEventListener("submit", e => {
   e.preventDefault();
   const titulo = juegoTitulo.value.trim();
@@ -85,7 +75,6 @@ formJuego.addEventListener("submit", e => {
   actualizarSelects();
 });
 
-// Agregar mapa
 formMapa.addEventListener("submit", e => {
   e.preventDefault();
   const titulo = mapaTitulo.value.trim();
@@ -104,16 +93,13 @@ formMapa.addEventListener("submit", e => {
   juego.mapas.push(nuevoMapa);
   mapaTitulo.value = "";
 
-  // Si el juego agregado es el seleccionado para random, refrescar la lista
   if (selectJuegoRandom.value == juegoId) {
     mostrarMapas();
   }
 });
 
-// Cuando cambias de juego para random, mostrar sus mapas
 selectJuegoRandom.addEventListener("change", mostrarMapas);
 
-// Botón reiniciar baneos
 btnReiniciarBaneos.addEventListener("click", () => {
   const juegoId = selectJuegoRandom.value;
   if (!juegoId) return;
@@ -123,7 +109,6 @@ btnReiniciarBaneos.addEventListener("click", () => {
   mostrarMapas();
 });
 
-// Botón mapa aleatorio
 btnMapaAleatorio.addEventListener("click", () => {
   const juegoId = selectJuegoRandom.value;
   if (!juegoId) {

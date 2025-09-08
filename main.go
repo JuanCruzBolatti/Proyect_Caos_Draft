@@ -38,7 +38,6 @@ func guardarDatos() {
 	_ = ioutil.WriteFile(dataFile, data, 0644)
 }
 
-// Generar IDs automáticos
 func generarIDJuego() string {
 	return fmt.Sprintf("juego-%d", len(juegos)+1)
 }
