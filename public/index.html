@@ -9,38 +9,47 @@
 <body>
   <h1>Gestión de Juegos y Mapas</h1>
 
+  <!-- Agregar Juego -->
   <section>
     <h2>Agregar Juego</h2>
     <form id="form-juego">
-      <input type="text" id="juego-titulo" placeholder="Título del juego" required>
+      <label for="juego-titulo">Título del juego:</label>
+      <input type="text" id="juego-titulo" required>
       <button type="submit">Agregar Juego</button>
     </form>
   </section>
 
+  <!-- Agregar Mapa -->
   <section>
     <h2>Agregar Mapa</h2>
+    <label for="select-juego-mapa">Selecciona un juego:</label>
     <select id="select-juego-mapa">
       <option value="">-- Selecciona un juego --</option>
     </select>
     <form id="form-mapa">
-      <input type="text" id="mapa-titulo" placeholder="Título del mapa" required>
+      <label for="mapa-titulo">Título del mapa:</label>
+      <input type="text" id="mapa-titulo" required>
       <button type="submit">Agregar Mapa</button>
     </form>
   </section>
 
+  <!-- Selección de Juego para Random -->
   <section>
     <h2>Seleccionar Juego para Random</h2>
+    <label for="select-juego-random">Selecciona un juego:</label>
     <select id="select-juego-random">
       <option value="">-- Selecciona un juego --</option>
     </select>
   </section>
 
+  <!-- Listado de Mapas -->
   <section>
     <h2>Mapas del Juego Seleccionado</h2>
     <button id="btn-reiniciar-baneos">Reiniciar Baneos del Juego</button>
     <ul id="lista-mapas"></ul>
   </section>
 
+  <!-- Mapa Aleatorio -->
   <section>
     <h2>Mapa Aleatorio</h2>
     <button id="btn-mapa-aleatorio">Seleccionar Aleatorio</button>

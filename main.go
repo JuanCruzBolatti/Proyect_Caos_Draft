@@ -1,30 +1,27 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
-
-	"database/sql"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
 type Mapa struct {
-	ID     string `json:"id"`
-	Titulo string `json:"titulo"`
+	ID      int    `json:"id"`
+	Titulo  string `json:"titulo"`
+	Baneado bool   `json:"baneado"`
 }
 
 type Juego struct {
-	ID     string `json:"id"`
+	ID     int    `json:"id"`
 	Titulo string `json:"titulo"`
 	Mapas  []Mapa `json:"mapas"`
 }
 
-var (
-	db *sql.DB
-)
+var db *sql.DB
 
 func conexionDB() {
 	var err error
@@ -34,17 +31,17 @@ func conexionDB() {
 		return
 	}
 
-	// Crear tablas si no existen
+	// Crear tablas con autoincrement
 	sqlJuegos := `
 	CREATE TABLE IF NOT EXISTS juegos (
-		id TEXT PRIMARY KEY,
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		titulo TEXT NOT NULL
 	);
 	`
 	sqlMapas := `
 	CREATE TABLE IF NOT EXISTS mapas (
-		id TEXT PRIMARY KEY,
-		juego_id TEXT NOT NULL,
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		juego_id INTEGER NOT NULL,
 		titulo TEXT NOT NULL,
 		baneado INTEGER DEFAULT 0,
 		FOREIGN KEY(juego_id) REFERENCES juegos(id)
@@ -69,7 +66,6 @@ func conexionDB() {
 func getJuegos(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	// Traer todos los juegos
 	rows, err := db.Query("SELECT id, titulo FROM juegos")
 	if err != nil {
 		http.Error(w, "Error al leer juegos", http.StatusInternalServerError)
@@ -85,17 +81,17 @@ func getJuegos(w http.ResponseWriter, _ *http.Request) {
 			continue
 		}
 
-		// Inicializamos el slice para que nunca sea nil
 		j.Mapas = []Mapa{}
 
-		// Traer mapas de este juego
-		mapasRows, err := db.Query("SELECT id, titulo FROM mapas WHERE juego_id = ?", j.ID)
+		mapasRows, err := db.Query("SELECT id, titulo, baneado FROM mapas WHERE juego_id = ?", j.ID)
 		if err == nil {
 			for mapasRows.Next() {
 				var m Mapa
-				if err := mapasRows.Scan(&m.ID, &m.Titulo); err != nil {
+				var baneadoInt int
+				if err := mapasRows.Scan(&m.ID, &m.Titulo, &baneadoInt); err != nil {
 					continue
 				}
+				m.Baneado = baneadoInt != 0
 				j.Mapas = append(j.Mapas, m)
 			}
 			mapasRows.Close()
@@ -104,8 +100,47 @@ func getJuegos(w http.ResponseWriter, _ *http.Request) {
 		juegosResp = append(juegosResp, j)
 	}
 
-	// Devolver JSON
 	json.NewEncoder(w).Encode(juegosResp)
+}
+
+func getMapas(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	juegoID := r.URL.Query().Get("juegoId")
+	var rows *sql.Rows
+	var err error
+
+	if juegoID != "" {
+		rows, err = db.Query("SELECT id, titulo, baneado FROM mapas WHERE juego_id = ?", juegoID)
+	} else {
+		rows, err = db.Query("SELECT id, titulo, juego_id, baneado FROM mapas")
+	}
+
+	if err != nil {
+		http.Error(w, "Error al leer mapas", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var mapas []Mapa
+	for rows.Next() {
+		var id int
+		var titulo string
+		var baneadoInt int
+		if juegoID != "" {
+			rows.Scan(&id, &titulo, &baneadoInt)
+		} else {
+			var juegoIDTemp int
+			rows.Scan(&id, &titulo, &juegoIDTemp, &baneadoInt)
+		}
+		mapas = append(mapas, Mapa{
+			ID:      id,
+			Titulo:  titulo,
+			Baneado: baneadoInt != 0,
+		})
+	}
+
+	json.NewEncoder(w).Encode(mapas)
 }
 
 func addJuego(w http.ResponseWriter, r *http.Request) {
@@ -117,48 +152,80 @@ func addJuego(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Generar un ID simple
-	id := fmt.Sprintf("juego-%d", time.Now().UnixNano())
-
-	_, err := db.Exec("INSERT INTO juegos(id, titulo) VALUES (?, ?)", id, input.Titulo)
+	res, err := db.Exec("INSERT INTO juegos(titulo) VALUES (?)", input.Titulo)
 	if err != nil {
 		http.Error(w, "Error al guardar juego", http.StatusInternalServerError)
 		return
 	}
 
-	// Devolver el juego creado
+	id, _ := res.LastInsertId()
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(Juego{ID: id, Titulo: input.Titulo, Mapas: []Mapa{}})
+	json.NewEncoder(w).Encode(Juego{ID: int(id), Titulo: input.Titulo, Mapas: []Mapa{}})
 }
 
 func addMapa(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
 	var payload struct {
-		JuegoID string `json:"juegoId"`
+		JuegoID int    `json:"juegoId"`
 		Titulo  string `json:"titulo"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil || payload.Titulo == "" || payload.JuegoID == "" {
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil || payload.Titulo == "" || payload.JuegoID == 0 {
 		http.Error(w, "Datos incompletos", http.StatusBadRequest)
 		return
 	}
 
-	// Generar ID único
-	mapaID := fmt.Sprintf("mapa-%d", time.Now().UnixNano())
+	var exists bool
+	err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM juegos WHERE id = ?)", payload.JuegoID).Scan(&exists)
+	if err != nil || !exists {
+		http.Error(w, "Juego no encontrado", http.StatusNotFound)
+		return
+	}
 
-	_, err := db.Exec("INSERT INTO mapas(id, juego_id, titulo) VALUES (?, ?, ?)", mapaID, payload.JuegoID, payload.Titulo)
+	res, err := db.Exec("INSERT INTO mapas(juego_id, titulo, baneado) VALUES (?, ?, 0)", payload.JuegoID, payload.Titulo)
 	if err != nil {
 		http.Error(w, "Error al guardar mapa", http.StatusInternalServerError)
 		return
 	}
 
+	mapaID, _ := res.LastInsertId()
+
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(Mapa{ID: mapaID, Titulo: payload.Titulo})
+	json.NewEncoder(w).Encode(Mapa{ID: int(mapaID), Titulo: payload.Titulo, Baneado: false})
+}
+
+func actualizarBaneo(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var payload struct {
+		MapaID  int  `json:"mapaId"`
+		Baneado bool `json:"baneado"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		http.Error(w, "Datos inválidos", http.StatusBadRequest)
+		return
+	}
+
+	_, err := db.Exec("UPDATE mapas SET baneado = ? WHERE id = ?", boolToInt(payload.Baneado), payload.MapaID)
+	if err != nil {
+		http.Error(w, "Error al actualizar mapa", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func boolToInt(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
 }
 
 func main() {
 	conexionDB()
-
-	http.Handle("/", http.FileServer(http.Dir("./public")))
+	defer db.Close()
 
 	http.HandleFunc("/api/juegos", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
@@ -167,8 +234,24 @@ func main() {
 			addJuego(w, r)
 		}
 	})
-	http.HandleFunc("/api/mapas", addMapa)
 
+	http.HandleFunc("/api/mapas", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "GET" {
+			getMapas(w, r)
+		} else if r.Method == "POST" {
+			addMapa(w, r)
+		}
+	})
+
+	http.HandleFunc("/api/mapas/baneo", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "POST" {
+			actualizarBaneo(w, r)
+		} else {
+			http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
+		}
+	})
+
+	http.Handle("/", http.FileServer(http.Dir("./public")))
 	fmt.Println("Servidor corriendo en http://localhost:8080")
 	http.ListenAndServe(":8080", nil)
 }
