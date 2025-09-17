@@ -1,27 +1,118 @@
-body {
-  font-family: Arial, sans-serif;
-  margin: 20px;
-  padding: 0;
-  background: #f9f9f9;
+@import url('https://fonts.googleapis.com/css2?family=Arvo:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+// Variables
+$primary-color: #4a90e2;
+$secondary-color: #00e5ff;
+$bg-color: #f9fafb;
+$text-color: #111827;
+$border-color: #e5e7eb;
+$radius: 0.7rem;
+$transition: 0.3s;
+
+
+// Global
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: "Arvo", serif; }
+body { background: $bg-color; color: $text-color; padding: 2rem; }
+
+h1, h2 { 
+  color: $primary-color; margin-bottom: 1rem; 
+}
+h1 { 
+  font-size: 2.5rem; margin-bottom: 2rem; text-align: center; 
+}
+h2 { 
+  font-size: 1.5rem;
+  font-weight: 200; 
+  padding-left: 3px;
 }
 
-h1, h2 {
-  color: #333;
+.logo {
+  width: 30rem;
+  margin-bottom: 2rem;
 }
 
+// Contenedor principal
+.container {
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+}
+
+.col-left {
+  width: 30%;
+}
+
+.col-right {
+  width: 70%;
+}
+
+// Secciones
 section {
-  margin-bottom: 20px;
-  padding: 15px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+  background: white;
+  padding: 1.5rem 2rem;
+  margin-bottom: 2rem;
+  border-radius: $radius;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
-input, select, button {
-  padding: 8px;
-  margin: 5px 0;
+// Formularios
+form {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  input, select {
+    flex: 1;
+    padding: .8rem 1rem;
+    border: 1px solid $border-color;
+    border-radius: $radius;
+    font-size: 1rem;
+    transition: border-color $transition;
+
+    &:focus { border-color: $primary-color; outline: none; }
+  }
+
+  button {
+    padding: 0.5rem 1.5rem;
+    background-color: $primary-color;
+    color: white;
+    border: none;
+    border-radius: $radius;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color $transition;
+
+    &:hover { background-color: darken($primary-color, 10%); }
+  }
 }
 
-button {
+// Listas de mapas
+ul {
+  list-style: none;
+  margin-top: 1rem;
+
+  li {
+    padding: 0.5rem;
+    border-bottom: 1px solid $border-color;
+    display: flex;
+    align-items: center;
+
+    input[type="checkbox"] { margin-right: 0.5rem; transform: scale(1.2); }
+  }
+}
+
+// Botones fuera de forms
+#btn-mapa-aleatorio, #btn-reiniciar-baneos {
+  padding: 0.5rem 1.5rem;
+  border-radius: $radius;
+  border: none;
   cursor: pointer;
+  background-color: $secondary-color;
+  color: #111827;
+  font-weight: bold;
+  transition: background-color $transition;
+
+  &:hover { background-color: darken($secondary-color, 10%); }
 }
+
+// Result

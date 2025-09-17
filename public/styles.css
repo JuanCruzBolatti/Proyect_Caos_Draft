@@ -1,27 +1,117 @@
-body {
-  font-family: Arial, sans-serif;
-  margin: 20px;
+@import url("https://fonts.googleapis.com/css2?family=Arvo:ital,wght@0,400;0,700;1,400;1,700&display=swap");
+* {
+  box-sizing: border-box;
+  margin: 0;
   padding: 0;
-  background: #f9f9f9;
+  font-family: "Arvo", serif;
+}
+
+body {
+  background: #f9fafb;
+  color: #111827;
+  padding: 2rem;
 }
 
 h1, h2 {
-  color: #333;
+  color: #4a90e2;
+  margin-bottom: 1rem;
+}
+
+h1 {
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 200;
+  padding-left: 3px;
+}
+
+.logo {
+  width: 30rem;
+  margin-bottom: 2rem;
+}
+
+.container {
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+}
+
+.col-left {
+  width: 30%;
+}
+
+.col-right {
+  width: 70%;
 }
 
 section {
-  margin-bottom: 20px;
-  padding: 15px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  background: white;
+  padding: 1.5rem 2rem;
+  margin-bottom: 2rem;
+  border-radius: 0.7rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
-input, select, button {
-  padding: 8px;
-  margin: 5px 0;
+form {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
-
-button {
+form input, form select {
+  flex: 1;
+  padding: 0.8rem 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.7rem;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+form input:focus, form select:focus {
+  border-color: #4a90e2;
+  outline: none;
+}
+form button {
+  padding: 0.5rem 1.5rem;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 0.7rem;
   cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+form button:hover {
+  background-color: rgb(34.3857142857, 117.3857142857, 214.6142857143);
+}
+
+ul {
+  list-style: none;
+  margin-top: 1rem;
+}
+ul li {
+  padding: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+}
+ul li input[type=checkbox] {
+  margin-right: 0.5rem;
+  transform: scale(1.2);
+}
+
+#btn-mapa-aleatorio, #btn-reiniciar-baneos {
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.7rem;
+  border: none;
+  cursor: pointer;
+  background-color: #00e5ff;
+  color: #111827;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+#btn-mapa-aleatorio:hover, #btn-reiniciar-baneos:hover {
+  background-color: rgb(0, 183.2, 204);
 }/*# sourceMappingURL=styles.css.map */
