@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -196,6 +197,39 @@ func addMapa(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(Mapa{ID: int(mapaID), Titulo: payload.Titulo, Baneado: false})
 }
 
+func deleteJuego(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	// Get juego ID from query parameter
+	idStr := r.URL.Query().Get("id")
+	if idStr == "" {
+		http.Error(w, "ID de juego requerido", http.StatusBadRequest)
+		return
+	}
+
+	juegoID, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "ID de juego inválido", http.StatusBadRequest)
+		return
+	}
+
+	// Delete all maps for this game
+	_, err = db.Exec("DELETE FROM mapas WHERE juego_id = ?", juegoID)
+	if err != nil {
+		http.Error(w, "Error eliminando mapas: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Delete the game itself
+	_, err = db.Exec("DELETE FROM juegos WHERE id = ?", juegoID)
+	if err != nil {
+		http.Error(w, "Error eliminando juego: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent) // 204 No Content
+}
+
 func actualizarBaneo(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var payload struct {
@@ -232,6 +266,8 @@ func main() {
 			getJuegos(w, r)
 		} else if r.Method == "POST" {
 			addJuego(w, r)
+		} else if r.Method == "DELETE" {
+			deleteJuego(w, r)
 		}
 	})
 

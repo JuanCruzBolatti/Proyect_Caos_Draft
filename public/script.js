@@ -2,6 +2,7 @@ let juegos = [];
 
 const formJuego = document.getElementById("form-juego");
 const juegoTitulo = document.getElementById("juego-titulo");
+const listaJuegos = document.getElementById("lista-juegos");
 
 const formMapa = document.getElementById("form-mapa");
 const mapaTitulo = document.getElementById("mapa-titulo");
@@ -45,6 +46,49 @@ function actualizarSelects() {
 
   console.log("Selects actualizados.");
 }
+
+function mostrarJuegos() {
+  listaJuegos.innerHTML = ""; // Clear existing list
+
+  juegos.forEach(juego => {
+    const li = document.createElement("li");
+    li.textContent = juego.titulo + " ";
+
+    // Delete button
+    const btnDelete = document.createElement("button");
+    btnDelete.textContent = "X";
+    btnDelete.classList.add("delete-btn");
+    btnDelete.style.marginLeft = "10px";
+    btnDelete.addEventListener("click", () => eliminarJuego(juego.id));
+
+    li.appendChild(btnDelete);
+    listaJuegos.appendChild(li);
+  });
+
+  console.log("Lista de juegos mostrada.");
+}
+
+async function eliminarJuego(juegoId) {
+  if (!confirm("¿Seguro que quieres eliminar este juego y todos sus mapas?")) return;
+
+  try {
+    console.log(`Eliminando juego ${juegoId}...`);
+    const res = await fetch(`/api/juegos?id=${juegoId}`, { method: "DELETE" });
+    if (!res.ok) throw new Error("Error eliminando juego");
+
+    // Remove from local array
+    juegos = juegos.filter(j => j.id !== juegoId);
+
+    // Refresh UI
+    mostrarJuegos();
+    actualizarSelects();
+
+    console.log(`Juego ${juegoId} eliminado.`);
+  } catch (err) {
+    console.error("Error eliminando juego:", err);
+  }
+}
+
 
 function mostrarMapas() {
   listaMapas.innerHTML = "";
@@ -100,6 +144,8 @@ formJuego.addEventListener("submit", async e => {
   } catch (err) {
     console.error("Error agregando juego:", err);
   }
+
+  mostrarJuegos();
 });
 
 formMapa.addEventListener("submit", async e => {
@@ -176,4 +222,6 @@ btnMapaAleatorio.addEventListener("click", () => {
 });
 
 // ------------------- Inicialización -------------------
-cargarJuegos();
+cargarJuegos().then(() => {
+  mostrarJuegos();
+});
