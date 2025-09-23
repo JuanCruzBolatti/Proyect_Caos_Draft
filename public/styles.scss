@@ -61,7 +61,7 @@ form {
   gap: 1rem;
   flex-wrap: wrap;
 
-  input, select {
+  input {
     flex: 1;
     padding: .8rem 1rem;
     border: 1px solid $border-color;
@@ -85,6 +85,61 @@ form {
     &:hover { background-color: darken($primary-color, 10%); }
   }
 }
+
+// General style for all select boxes
+select {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fff;
+  color: #333;
+  cursor: pointer;
+
+  // Remove default arrow
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  // Add some spacing for the custom arrow
+  padding-right: 2.5rem;
+
+  &:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  }
+
+  option {
+    background: #fff;
+    color: #333;
+  }
+}
+
+// Wrap your selects to insert a custom arrow
+.select-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+
+  select {
+    width: 100%;
+  }
+
+  // Fake arrow
+  &::after {
+    content: "▼";
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.8rem;
+    color: #666;
+    pointer-events: none;
+  }
+}
+
 
 // Listas de mapas
 ul {
