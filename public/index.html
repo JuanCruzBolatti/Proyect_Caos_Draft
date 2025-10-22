@@ -1,62 +1,62 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gestión de Juegos y Mapas</title>
+  <title>Game and Map Management</title>
   <link rel="icon" type="image/x-icon" href="./img/favicon.ico">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   
   <div class="container">
-    <!-- Columna Izquierda -->
+    <!-- Left Column -->
     <div class="col-left">
       <img src="/img/logo.svg" alt="Pick n Map Logo" class="logo"> 
       
       <section>
-        <h2>Agregar Juego</h2>
+        <h2>Add Game</h2>
         <form id="form-juego">
-          <input type="text" id="juego-titulo" placeholder="Título del Juego" required>
-          <button type="submit">Agregar</button>
+          <input type="text" id="juego-titulo" placeholder="Game Title" required>
+          <button type="submit">Add</button>
         </form>
         <ul id="lista-juegos"></ul>
       </section>
 
       <section>
-        <h2>Agregar Mapa</h2>
+        <h2>Add Map</h2>
         <div class="select-wrapper">
           <select id="select-juego-mapa">
-            <option value="">-- Selecciona un juego --</option>
+            <option value="">-- Select a game --</option>
           </select>
         </div>
         <form id="form-mapa">
-          <input type="text" id="mapa-titulo" placeholder="Título del mapa" required>
-          <button type="submit">Agregar Mapa</button>
+          <input type="text" id="mapa-titulo" placeholder="Map Title" required>
+          <button type="submit">Add Map</button>
         </form>
       </section>
     </div>
 
-    <!-- Columna Derecha -->
+    <!-- Right Column -->
     <div class="col-right">
       <section>
-        <h2>Seleccionar Juego para Random</h2>
+        <h2>Select Game for Random</h2>
         <div class="select-wrapper">
           <select id="select-juego-random">
-            <option value="">-- Selecciona un juego --</option>
+            <option value="">-- Select a game --</option>
           </select>
         </div>
       </section>
 
       <section>
-        <h2>Mapas del Juego Seleccionado</h2>
-        <button id="btn-reiniciar-baneos">Reiniciar Baneos del Juego</button>
+        <h2>Maps of Selected Game</h2>
+        <button id="btn-reiniciar-baneos">Reset Game Bans</button>
         <ul id="lista-mapas"></ul>
       </section>
 
       <section>
-        <h2>Mapa Aleatorio</h2>
-        <button id="btn-mapa-aleatorio">Seleccionar Aleatorio</button>
+        <h2>Random Map</h2>
+        <button id="btn-mapa-aleatorio">Select Random</button>
         <div id="resultado-aleatorio"></div>
       </section>
     </div>
