@@ -230,6 +230,30 @@ func deleteJuego(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent) // 204 No Content
 }
 
+func deleteMapa(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	idStr := r.URL.Query().Get("id")
+	if idStr == "" {
+		http.Error(w, "ID de mapa requerido", http.StatusBadRequest)
+		return
+	}
+
+	mapaID, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "ID de mapa inválido", http.StatusBadRequest)
+		return
+	}
+
+	_, err = db.Exec("DELETE FROM mapas WHERE id = ?", mapaID)
+	if err != nil {
+		http.Error(w, "Error eliminando mapa", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent) // 204 No Content
+}
+
 func actualizarBaneo(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var payload struct {
@@ -276,6 +300,8 @@ func main() {
 			getMapas(w, r)
 		} else if r.Method == "POST" {
 			addMapa(w, r)
+		} else if r.Method == "DELETE" {
+			deleteMapa(w, r)
 		}
 	})
 

@@ -89,6 +89,25 @@ async function eliminarJuego(juegoId) {
   }
 }
 
+async function eliminarMapa(mapaId) {
+  if (!confirm("¿Seguro que quieres eliminar este mapa?")) return;
+  try {
+    console.log(`Eliminando mapa ${mapaId}...`);
+    const res = await fetch(`/api/mapas?id=${mapaId}`, { method: "DELETE" });
+    if (!res.ok) throw new Error("Error eliminando mapa");
+
+    // Remove from local array
+    const juego = juegos.find(j => j.id == selectJuegoRandom.value);
+    if (juego) {
+      juego.mapas = juego.mapas.filter(m => m.id !== mapaId);
+      mostrarMapas();
+    }
+
+    console.log(`Mapa ${mapaId} eliminado.`);
+  } catch (err) {
+    console.error("Error eliminando mapa:", err);
+  }
+}
 
 function mostrarMapas() {
   listaMapas.innerHTML = "";
@@ -118,6 +137,13 @@ function mostrarMapas() {
       }
     });
 
+    const btnDelete = document.createElement("button");
+    btnDelete.textContent = "X";
+    btnDelete.classList.add("delete-btn");
+    btnDelete.style.marginRight = "10px";
+    btnDelete.addEventListener("click", () => eliminarMapa(mapa.id));
+
+    li.appendChild(btnDelete);
     li.appendChild(checkbox);
     li.append(` ${mapa.titulo}`);
     listaMapas.appendChild(li);
